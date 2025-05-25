@@ -85,7 +85,11 @@
 
   <script>
     $(document).ready(function(){
-      // فعال کردن DataTables
+      $('#issues').on('click', '.show-diag', function(){
+  const url = $(this).closest('tr').data('embed-url');
+  $('#diagram').attr('src', url);
+});
+
       $('#issues').DataTable({
         paging: false,
         info: false,
