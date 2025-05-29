@@ -1,116 +1,72 @@
 <!DOCTYPE html>
-<html lang="fa">
+<html lang="fa" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
-  <title>دایرکتوری نمودارهای سیستمی</title>
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-  <link href="https://cdn.datatables.net/1.13.5/css/jquery.dataTables.min.css" rel="stylesheet" />
-  <script src="https://cdn.datatables.net/1.13.5/js/jquery.dataTables.min.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>داشبورد مصور و تعاملی مسائل</title>
+  <!-- استایل‌های پایه (Bootstrap یا CSS دلخواه) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
   <style>
-    body {
-      font-family: "Tahoma", sans-serif;
-      margin: 20px;
-      direction: rtl;
-      background-color: #f4f7f9;
-      color: #222;
-    }
-    table {
-      width: 100%;
-      margin-bottom: 20px;
-      border-collapse: collapse;
-      background-color: white;
-      box-shadow: 0 0 5px rgba(0,0,0,0.1);
-    }
-    th, td {
-      padding: 12px 15px;
-      text-align: center;
-    }
-    th {
-      background-color: #007acc;
-      color: white;
-    }
-    button.show-diag {
-      padding: 8px 12px;
-      background-color: #007acc;
-      border: none;
-      color: white;
-      border-radius: 4px;
-      cursor: pointer;
-      transition: background-color 0.25s ease;
-    }
-    button.show-diag:hover {
-      background-color: #005fa3;
-    }
-    h2, h3 {
-      margin-bottom: 10px;
-    }
-    #diagram {
-      width: 100%;
-      height: 600px;
-      border: 1px solid #ccc;
-      background-color: white;
-      box-shadow: 0 0 5px rgba(0,0,0,0.1);
-    }
+    body { padding: 1rem; font-family: Vazir, sans-serif; background: #f8f9fa; }
+    table { margin-top: 1rem; }
+    iframe { width: 100%; height: 70vh; border: 0; border-radius: .5rem; box-shadow: 0 0 8px rgba(0,0,0,.1); }
   </style>
 </head>
 <body>
-
-  <h2> (آخرین تغییر 03/05 21:00)داشبورد مصور و تعاملی مسائل</h2>
-
-  <table id="issues" class="display">
-    <thead>
-      <tr>
-        <th>مسئله</th>
-        <th>توضیح</th>
-        <th>نمودار</th>
-      </tr>
-    </thead>
-    <tbody>
-     <tr data-embed-url="https://kumu.io/embed/e5ae158f04604332bb9ef53074382a77?layout=network&toolbar=no">
-  <td>انتقال آب کلات به مشهد</td>
-  <td>کمبود منابع و تغییرات زیست‌محیطی</td>
-  <td><button class="show-diag">نمایش</button></td>
-</tr>
-      <tr data-embed-url="https://kumu.io/embed/05d723c0c1f1936a1f3b1a72c98efc05?layout=network&toolbar=no">
-        <td>انتقال آب کلات به مشهد نمونه 2</td>
-        <td>از بین رفتن مشاغل کشاورزی در کلات </td>
-        <td><button class="show-diag">نمایش</button></td>
-      </tr>
-      <!-- ردیف‌های بیشتر را اینجا اضافه کنید -->
-    </tbody>
-  </table>
-
- <h3>نمودار انتخاب‌شده</h3>
-<iframe id="diagram" width="940" height="600" frameborder="0"></iframe>
+  <div class="container">
+    <div class="d-flex justify-content-between align-items-center">
+      <h2>داشبورد مصور و تعاملی مسائل</h2>
+      <small>آخرین تغییر: 03/05 21:00</small>
+    </div>
+    <div class="mb-3">
+      <input id="search" class="form-control" type="text" placeholder="جستجو..."></input>
+    </div>
+    <table class="table table-striped">
+      <thead class="table-primary">
+        <tr>
+          <th scope="col">نمودار</th>
+          <th scope="col">توضیح</th>
+          <th scope="col">مسئله</th>
+        </tr>
+      </thead>
+      <tbody id="chart-list">
+        <tr>
+          <td><button class="btn btn-sm btn-outline-primary" onclick="loadChart('kumu1')">نمایش</button></td>
+          <td>کمبود منابع و تغییرات زیست‌محیطی</td>
+          <td>انتقال آب کلات به مشهد</td>
+        </tr>
+        <tr>
+          <td><button class="btn btn-sm btn-outline-primary" onclick="loadChart('kumu2')">نمایش</button></td>
+          <td>از بین رفتن مشاغل کشاورزی در کلات</td>
+          <td>انتقال آب کلات به مشهد (نمونه 2)</td>
+        </tr>
+        <tr>
+          <td><button class="btn btn-sm btn-outline-success" onclick="loadChart('im')">نمایش</button></td>
+          <td>شبیه‌سازی دینامیک سیستم (MVP)</td>
+          <td>نمودار جدید از Insight Maker</td>
+        </tr>
+      </tbody>
+    </table>
+    <h5 class="mt-4">نمودار انتخاب‌شده</h5>
+    <iframe id="viewer" src="" allowfullscreen></iframe>
+  </div>
 
   <script>
-    $(document).ready(function(){
-      $('#issues').on('click', '.show-diag', function(){
-  const url = $(this).closest('tr').data('embed-url');
-  $('#diagram').attr('src', url);
-});
+    // نگاشت کلیدها به URL های Embed
+    const charts = {
+      kumu1: 'https://kumu.io/your-kumu-map-embed-link',
+      kumu2: 'https://kumu.io/your-kumu-sample2-embed-link',
+      im:    'https://insightmaker.com/insight/ABCD1234/embed?run=true&hideToolbar=true'
+    };
 
-      $('#issues').DataTable({
-        paging: false,
-        info: false,
-        language: {
-          search: "جستجو:",
-          zeroRecords: "موردی یافت نشد",
-          emptyTable: "داده‌ای وجود ندارد",
-          paginate: {
-            previous: "قبلی",
-            next: "بعدی"
-          }
-        }
-      });
+    // بارگذاری نمودار
+    function loadChart(key) {
+      const frame = document.getElementById('viewer');
+      frame.src = charts[key] || '';
+    }
 
-      // تغییر آدرس iframe با کلیک روی دکمه نمایش
-      $('#issues').on('click', '.show-diag', function(){
-        const url = $(this).closest('tr').data('embed-url');
-        $('#diagram').attr('src', url);
-      });
-    });
+    // پیش‌فرض: نمایش اولین نمودار
+    loadChart('kumu1');
   </script>
-
 </body>
 </html>
